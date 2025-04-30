@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>City AQI Forecast Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #eef2f7, #d6e4f0);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        .container:hover {
+            box-shadow: 0px 6px 25px rgba(0,0,0,0.25);
+        }
+        label {
+            font-size: 1.1em;
+            color: #34495e;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 1em;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+        }
+        #date{
+            width:95.5%;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .good { background-color: #00e400; padding: 10px; border-radius: 5px; }
+        .satisfactory { background-color: #a3c853; padding: 10px; border-radius: 5px; }
+        .moderate { background-color: #ffff00; padding: 10px; border-radius: 5px; }
+        .poor { background-color: #ff7e00; padding: 10px; border-radius: 5px; }
+        .verypoor { background-color: #ff0000; padding: 10px; border-radius: 5px; color: white; }
+        .severe { background-color: #99004c; padding: 10px; border-radius: 5px; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>🌏 Indian Cities AQI Forecast Dashboard</h1>
+
+    <div class="container">
+        <form id="forecastForm" onsubmit="submitForm(event)">
+            <label for="city">Select a City:</label>
+            <select id="city" required>
+                <option value="">--Select City--</option>
+                <option value="Agra">Agra</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+                <option value="Amritsar">Amritsar</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Bhopal">Bhopal</option>
+                <option value="Chandigarh">Chandigarh</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Gandhinagar">Gandhinagar</option>
+                <option value="Gurugram">Gurugram</option>
+                <option value="Guwahati">Guwahati</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Kolkata">Kolkata</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Noida">Noida</option>
+                <option value="Patna">Patna</option>
+                <option value="Puducherry">Puducherry</option>
+                <option value="Srinagar">Srinagar</option>
+                <option value="Ujjain">Ujjain</option>
+                <option value="Visakhapatnam">Visakhapatnam</option>
+                
+            </select>
+
+            <label for="date">Select a Date:</label>
+            <input type="date" id="date" required>
+
+            <button type="submit">Forecast AQI</button>
+        </form>
+
+        <div class="result" id="result">
+            <!-- AQI results will appear here -->
+        </div>
+    </div>
+
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const city = document.getElementById('city').value;
+            const date = document.getElementById('date').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Fetching forecast... 🔄";
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/forecast', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ city: city, date: date })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<span style="color:red;">Error: ${data.error}</span>`;
+                } else {
+                    let categoryClass = '';
+                    switch (data.category.toLowerCase()) {
+                        case 'good':
+                            categoryClass = 'good'; break;
+                        case 'satisfactory':
+                            categoryClass = 'satisfactory'; break;
+                        case 'moderate':
+                            categoryClass = 'moderate'; break;
+                        case 'poor':
+                            categoryClass = 'poor'; break;
+                        case 'very poor':
+                            categoryClass = 'verypoor'; break;
+                        case 'severe':
+                            categoryClass = 'severe'; break;
+                        default:
+                            categoryClass = '';
+                    }
+
+                    resultDiv.innerHTML = `
+                        <h2>${data.city}</h2>
+                        <p><strong>Date:</strong> ${data.date}</p>
+                        <div class="${categoryClass}">
+                            <p><strong>Predicted AQI:</strong> ${data.predicted_AQI}</p>
+                            <p><strong>Category:</strong> ${data.category}</p>
+                            <p><strong>Dominant Pollutant:</strong> ${data.dominant_pollutant}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerHTML = `<span style="color:red;">Failed to fetch data!</span>`;
+            }
+        }
+    </script>
+
+</body>
+</html>
