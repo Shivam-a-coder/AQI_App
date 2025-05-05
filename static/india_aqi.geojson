@@ -1,0 +1,28 @@
+{
+"type": "FeatureCollection",
+"name": "aqi_map",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 1, "City": "Agra", "Latitude": 27.1767, "Longitude": 78.0081, "predicted_AQI": 426 }, "geometry": { "type": "Point", "coordinates": [ 78.0081, 27.1767 ] } },
+{ "type": "Feature", "properties": { "fid": 2, "City": "Ahmedabad", "Latitude": 23.0225, "Longitude": 72.5714, "predicted_AQI": 262 }, "geometry": { "type": "Point", "coordinates": [ 72.5714, 23.0225 ] } },
+{ "type": "Feature", "properties": { "fid": 3, "City": "Amritsar", "Latitude": 31.634, "Longitude": 74.8723, "predicted_AQI": 117 }, "geometry": { "type": "Point", "coordinates": [ 74.8723, 31.634 ] } },
+{ "type": "Feature", "properties": { "fid": 4, "City": "Bengaluru", "Latitude": 12.9716, "Longitude": 77.5946, "predicted_AQI": 303 }, "geometry": { "type": "Point", "coordinates": [ 77.5946, 12.9716 ] } },
+{ "type": "Feature", "properties": { "fid": 5, "City": "Bhopal", "Latitude": 23.2599, "Longitude": 77.4126, "predicted_AQI": 125 }, "geometry": { "type": "Point", "coordinates": [ 77.4126, 23.2599 ] } },
+{ "type": "Feature", "properties": { "fid": 6, "City": "Chandigarh", "Latitude": 30.7333, "Longitude": 76.7794, "predicted_AQI": 141 }, "geometry": { "type": "Point", "coordinates": [ 76.7794, 30.7333 ] } },
+{ "type": "Feature", "properties": { "fid": 7, "City": "Chennai", "Latitude": 13.0827, "Longitude": 80.2707, "predicted_AQI": 228 }, "geometry": { "type": "Point", "coordinates": [ 80.2707, 13.0827 ] } },
+{ "type": "Feature", "properties": { "fid": 8, "City": "Delhi", "Latitude": 28.6139, "Longitude": 77.209, "predicted_AQI": 334 }, "geometry": { "type": "Point", "coordinates": [ 77.209, 28.6139 ] } },
+{ "type": "Feature", "properties": { "fid": 9, "City": "Gandhinagar", "Latitude": 23.2156, "Longitude": 72.6369, "predicted_AQI": 89 }, "geometry": { "type": "Point", "coordinates": [ 72.6369, 23.2156 ] } },
+{ "type": "Feature", "properties": { "fid": 10, "City": "Gurugram", "Latitude": 28.4595, "Longitude": 77.0266, "predicted_AQI": 144 }, "geometry": { "type": "Point", "coordinates": [ 77.0266, 28.4595 ] } },
+{ "type": "Feature", "properties": { "fid": 11, "City": "Hyderabad", "Latitude": 17.385, "Longitude": 78.4867, "predicted_AQI": 76 }, "geometry": { "type": "Point", "coordinates": [ 78.4867, 17.385 ] } },
+{ "type": "Feature", "properties": { "fid": 12, "City": "Kolkata", "Latitude": 22.5726, "Longitude": 88.3639, "predicted_AQI": 68 }, "geometry": { "type": "Point", "coordinates": [ 88.3639, 22.5726 ] } },
+{ "type": "Feature", "properties": { "fid": 13, "City": "Lucknow", "Latitude": 26.8467, "Longitude": 80.9462, "predicted_AQI": 363 }, "geometry": { "type": "Point", "coordinates": [ 80.9462, 26.8467 ] } },
+{ "type": "Feature", "properties": { "fid": 14, "City": "Mumbai", "Latitude": 19.076, "Longitude": 72.8777, "predicted_AQI": 46 }, "geometry": { "type": "Point", "coordinates": [ 72.8777, 19.076 ] } },
+{ "type": "Feature", "properties": { "fid": 15, "City": "Noida", "Latitude": 28.5355, "Longitude": 77.391, "predicted_AQI": 372 }, "geometry": { "type": "Point", "coordinates": [ 77.391, 28.5355 ] } },
+{ "type": "Feature", "properties": { "fid": 16, "City": "Patna", "Latitude": 25.5941, "Longitude": 85.1376, "predicted_AQI": 119 }, "geometry": { "type": "Point", "coordinates": [ 85.1376, 25.5941 ] } },
+{ "type": "Feature", "properties": { "fid": 17, "City": "Puducherry", "Latitude": 11.9139, "Longitude": 79.8145, "predicted_AQI": 57 }, "geometry": { "type": "Point", "coordinates": [ 79.8145, 11.9139 ] } },
+{ "type": "Feature", "properties": { "fid": 18, "City": "Srinagar", "Latitude": 34.0837, "Longitude": 74.7973, "predicted_AQI": 49 }, "geometry": { "type": "Point", "coordinates": [ 74.7973, 34.0837 ] } },
+{ "type": "Feature", "properties": { "fid": 19, "City": "Ujjain", "Latitude": 23.1793, "Longitude": 75.7849, "predicted_AQI": 181 }, "geometry": { "type": "Point", "coordinates": [ 75.7849, 23.1793 ] } },
+{ "type": "Feature", "properties": { "fid": 20, "City": "Visakhapatnam", "Latitude": 17.6868, "Longitude": 83.2185, "predicted_AQI": 84 }, "geometry": { "type": "Point", "coordinates": [ 83.2185, 17.6868 ] } },
+{ "type": "Feature", "properties": { "fid": 21, "City": "Guwahati", "Latitude": 26.1445, "Longitude": 91.7362, "predicted_AQI": 68 }, "geometry": { "type": "Point", "coordinates": [ 91.7362, 26.1445 ] } }
+]
+}

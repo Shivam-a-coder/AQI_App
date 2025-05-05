@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>City AQI Forecast Dashboard</title>
+    <!-- Leaflet CSS (only once, no integrity check to avoid browser blocking) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,7 +19,26 @@
             color: #2c3e50;
             margin-bottom: 20px;
         }
-        .container {
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background 0.3s;
+        }
+        .nav button.active,
+        .nav button:hover {
+            background-color: #2980b9;
+        }
+        .container, .map-container {
             max-width: 550px;
             margin: auto;
             background: white;
@@ -23,9 +47,16 @@
             box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
             transition: 0.3s;
         }
-        .container:hover {
-            box-shadow: 0px 6px 25px rgba(0,0,0,0.25);
+        .container ,.map-container{
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 12px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow-x: auto; /* ← Important for responsiveness */
         }
+        .hidden { display: none; }
         label {
             font-size: 1.1em;
             color: #34495e;
@@ -39,8 +70,8 @@
             border: 1px solid #bdc3c7;
             border-radius: 5px;
         }
-        #date{
-            width:95.5%;
+        #date, #mapDate {
+            width:97%;
         }
         button {
             background-color: #3498db;
@@ -63,13 +94,61 @@
         .poor { background-color: #ff7e00; padding: 10px; border-radius: 5px; }
         .verypoor { background-color: #ff0000; padding: 10px; border-radius: 5px; color: white; }
         .severe { background-color: #99004c; padding: 10px; border-radius: 5px; color: white; }
+        #map { height: 500px; width: 100%; border-radius: 8px; }
+        
+        #histView label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        #histCity {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+
+        #histView button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #histView button:hover {
+            background-color: #2980b9;
+        }
+        #historicalPlots {
+        overflow-x: auto;
+        padding-bottom: 20px;
+        overflow-y: visible;
+        }
+        
+
+
+
     </style>
 </head>
 <body>
-
     <h1>🌏 Indian Cities AQI Forecast Dashboard</h1>
+    <div class="nav">
+        <button id="btnCity" class="active">City-wise AQI Analysis</button>
+        <button id="btnMap">Compare AQI of all cities on Map</button>
+        <button id="btnHist">Historical Trends of Parameters</button>
+       
+        
+    </div>
 
-    <div class="container">
+    <!-- City Analysis View -->
+    <div id="cityView" class="container">
         <form id="forecastForm" onsubmit="submitForm(event)">
             <label for="city">Select a City:</label>
             <select id="city" required>
@@ -95,7 +174,6 @@
                 <option value="Srinagar">Srinagar</option>
                 <option value="Ujjain">Ujjain</option>
                 <option value="Visakhapatnam">Visakhapatnam</option>
-                
             </select>
 
             <label for="date">Select a Date:</label>
@@ -103,69 +181,244 @@
 
             <button type="submit">Forecast AQI</button>
         </form>
-
-        <div class="result" id="result">
-            <!-- AQI results will appear here -->
-        </div>
+        <div class="result" id="result"></div>
     </div>
 
+    <!-- Map Comparison View -->
+    <div id="mapView" class="map-container hidden">
+        <label for="mapDate">Select a Date:</label>
+        <input type="date" id="mapDate" required>
+        <button onclick="loadIndiaAQI()">Show on Map</button>
+        <div id="map"></div>
+    </div>
+    <div id="histView" class="container hidden">
+        <label for="histCity">Select City:</label>
+        <select id="histCity" required>
+          <option value="">--Select City--</option>
+          <option value="Agra">Agra</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+                <option value="Amritsar">Amritsar</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Bhopal">Bhopal</option>
+                <option value="Chandigarh">Chandigarh</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Gandhinagar">Gandhinagar</option>
+                <option value="Gurugram">Gurugram</option>
+                <option value="Guwahati">Guwahati</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Kolkata">Kolkata</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Noida">Noida</option>
+                <option value="Patna">Patna</option>
+                <option value="Puducherry">Puducherry</option>
+                <option value="Srinagar">Srinagar</option>
+                <option value="Ujjain">Ujjain</option>
+                <option value="Visakhapatnam">Visakhapatnam</option>
+          <!-- …other cities… -->
+        </select>
+        <button onclick="loadHistorical()">Show Historical Trends</button>
+        <div id="historicalPlots" style="margin-top:20px;"></div>
+    </div>
+    
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
     <script>
+        // View toggle
+        const btnCity = document.getElementById('btnCity');
+        const btnMap = document.getElementById('btnMap');
+        const cityView = document.getElementById('cityView');
+        const mapView = document.getElementById('mapView');
+        
+        const btnHist = document.getElementById('btnHist');
+        const histView = document.getElementById('histView');
+
+        btnHist.onclick = () => {
+        [btnCity, btnMap, btnHist].forEach(b=> b.classList.remove('active'));
+        btnHist.classList.add('active');
+        [cityView, mapView, histView].forEach(v=> v.classList.add('hidden'));
+        histView.classList.remove('hidden');
+        };
+
+        
+        btnCity.onclick = () => {
+            btnCity.classList.add('active'); btnMap.classList.remove('active');btnHist.classList.remove('active');
+            cityView.classList.remove('hidden'); mapView.classList.add('hidden');histView.classList.add('hidden');
+
+        };
+        btnMap.onclick = () => {
+            btnMap.classList.add('active'); btnCity.classList.remove('active');btnHist.classList.remove('active');
+            mapView.classList.remove('hidden'); cityView.classList.add('hidden');histView.classList.add('hidden');
+        };
+        
+
+        // City-wise AQI
         async function submitForm(event) {
             event.preventDefault();
-
             const city = document.getElementById('city').value;
             const date = document.getElementById('date').value;
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = "Fetching forecast... 🔄";
-
             try {
-                const response = await fetch('http://127.0.0.1:5000/forecast', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                const response = await fetch('/forecast', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ city: city, date: date })
                 });
-
                 const data = await response.json();
-
                 if (data.error) {
                     resultDiv.innerHTML = `<span style="color:red;">Error: ${data.error}</span>`;
                 } else {
-                    let categoryClass = '';
-                    switch (data.category.toLowerCase()) {
-                        case 'good':
-                            categoryClass = 'good'; break;
-                        case 'satisfactory':
-                            categoryClass = 'satisfactory'; break;
-                        case 'moderate':
-                            categoryClass = 'moderate'; break;
-                        case 'poor':
-                            categoryClass = 'poor'; break;
-                        case 'very poor':
-                            categoryClass = 'verypoor'; break;
-                        case 'severe':
-                            categoryClass = 'severe'; break;
-                        default:
-                            categoryClass = '';
-                    }
-
+                    let cls = data.category.toLowerCase().replace(' ', '');
                     resultDiv.innerHTML = `
                         <h2>${data.city}</h2>
                         <p><strong>Date:</strong> ${data.date}</p>
-                        <div class="${categoryClass}">
+                        <div class="${cls}">
                             <p><strong>Predicted AQI:</strong> ${data.predicted_AQI}</p>
                             <p><strong>Category:</strong> ${data.category}</p>
                             <p><strong>Dominant Pollutant:</strong> ${data.dominant_pollutant}</p>
                         </div>
                     `;
                 }
-            } catch (error) {
-                console.error(error);
+            } catch (e) {
                 resultDiv.innerHTML = `<span style="color:red;">Failed to fetch data!</span>`;
             }
         }
-    </script>
 
+        // Map-wise AQI
+        let map, indiaLayer;
+        function initMap() {
+            if (map) return;
+            map = L.map('map').setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        }
+        let legend;
+        let flag=true;
+        function addLegend() {
+            // If a legend already exists, remove it first
+            if (legend) {
+                map.removeControl(legend);
+            }
+
+            legend = L.control({ position: 'bottomright' });
+
+            legend.onAdd = function (map) {
+                const div = L.DomUtil.create('div', 'info legend');
+                const grades = [0, 51, 101, 201, 301, 401];
+                const labels = [
+                    'Good (0–50)', 'Satisfactory (51–100)', 'Moderate (101–200)',
+                    'Poor (201–300)', 'Very Poor (301–400)', 'Severe (401+)'
+                ];
+                const colors = ['#00e400', '#a3c853', '#ffff00', '#ff7e00', '#ff0000', '#99004c'];
+
+                for (let i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        `<i style="background:${colors[i]}; width:18px; height:18px; float:left; margin-right:8px;"></i>` +
+                        `${labels[i]}<br>`;
+                }
+
+                return div;
+            };
+
+            legend.addTo(map);
+        }
+        async function loadIndiaAQI() {
+            const date = document.getElementById('mapDate').value;
+            if (!date) return alert('Select a date first');
+            initMap();
+            if (indiaLayer) map.removeLayer(indiaLayer);
+            const res = await fetch(`/india_aqi?date=${date}`);
+            const geojson = await res.json();
+
+            function getColor(aqi) {
+                if (aqi <= 50) return "#00e400";        // Good
+                else if (aqi <= 100) return "#a3c853";  // Satisfactory
+                else if (aqi <= 200) return "#ffff00";  // Moderate
+                else if (aqi <= 300) return "#ff7e00";  // Poor
+                else if (aqi <= 400) return "#ff0000";  // Very Poor
+                else return "#99004c";                  // Severe
+            }
+
+            indiaLayer = L.geoJSON(geojson, {
+                pointToLayer: (f, latlng) => {
+                    const aqi = f.properties.aqi || 0;
+
+                    const radius = Math.max(5, Math.min(aqi / 10, 20));
+                    const color = getColor(aqi);
+                    return L.circleMarker(latlng, {
+                        radius: radius,
+                        fillColor: color,
+                        color: color,
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                onEachFeature: (f, layer) => {
+                    const p = f.properties;
+                    layer.bindPopup(
+                        `<strong>${p.City}</strong><br>` +
+                        `AQI: ${p.predicted_AQI}<br>` +
+                        `Category: ${p.category}<br>` +
+                        `Dominant: ${p.dominant}`
+                    );
+                }
+            }).addTo(map);
+            map.fitBounds(indiaLayer.getBounds());
+            if(flag){
+                addLegend();
+                flag=!flag;
+            }
+
+        }
+        async function loadHistorical() {
+            const city = document.getElementById('histCity').value;
+            if (!city) {
+                alert('Please select a city.');
+                return;
+            }
+
+            const res = await fetch(`/historical_grouped?city=${encodeURIComponent(city)}`);
+            if (!res.ok) throw new Error(`Server returned ${res.status}`);
+            const json = await res.json();
+
+            console.log('Historical grouped JSON:', json);
+
+            if (json.error) {
+                document.getElementById('historicalPlots').innerHTML =
+                `<p style="color:red">${json.error}</p>`;
+                return;
+            }
+
+            const container = document.getElementById('historicalPlots');
+            container.innerHTML = '';
+
+            for (const [feature, fig] of Object.entries(json.plots)) {
+                const divId = `hist_${feature.replace(/\W+/g,'_')}`;
+                console.log('Plotting', feature, '-> div:', divId);
+
+                const wrap = document.createElement('div');
+                wrap.style.marginBottom = '40px';
+                wrap.innerHTML = `
+                
+                <div id="${divId}" style="width:100%;height:300px;"></div>
+                `;
+                container.appendChild(wrap);
+
+                try {
+                Plotly.newPlot(divId, fig.data, fig.layout);
+                
+                } catch (e) {
+                console.error('Plotly error for', feature, e);
+                }
+            }
+        }
+
+        
+
+
+    </script>
 </body>
 </html>
